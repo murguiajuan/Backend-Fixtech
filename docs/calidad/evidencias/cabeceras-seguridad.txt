@@ -1,0 +1,15 @@
+FIXTECH - Cabeceras de seguridad verificadas
+Fecha: 2026-10-25
+Objetivo: GET /api/catalogos/distritos y GET /swagger-ui/index.html
+
+Cabeceras observadas:
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'none';
+    object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
+    img-src 'self' data:; font-src 'self' data:; connect-src 'self'; form-action 'self'
+  Referrer-Policy: no-referrer
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+
+Nota: HSTS se emite únicamente sobre HTTPS; en las pruebas locales por HTTP no aparece,
+lo cual es el comportamiento correcto de Spring Security.

@@ -1,0 +1,21 @@
+FIXTECH - Verificación de base de datos tras las pruebas
+Fecha: 2026-10-25
+Base: fixtech_db (MariaDB 10.4.32 de XAMPP)
+
+Conteos:
+  usuario:              1 (admin@fixtech.pe)
+  cliente:              0
+  tecnico:              0
+  solicitud:            0
+  servicio:             0
+  resena:               0
+  reclamo:              0
+  pago_comision:        0
+  notificacion:         0
+  auditoria:            0
+  distrito:             10
+  parametro_sistema:    13
+
+Archivos privados en /tmp/opencode/fixtech-uploads: 0
+
+Conclusión: no quedaron datos transaccionales ni archivos de las pruebas.

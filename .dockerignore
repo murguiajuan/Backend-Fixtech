@@ -1,0 +1,14 @@
+.git
+.gitignore
+.idea
+.vscode
+target
+uploads
+backups
+*.log
+*.iml
+.env
+.env.*
+src/main/resources/application-dev.properties
+docs
+qa

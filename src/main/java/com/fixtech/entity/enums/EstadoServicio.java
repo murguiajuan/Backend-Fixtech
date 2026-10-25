@@ -1,0 +1,16 @@
+package com.fixtech.entity.enums;
+
+public enum EstadoServicio {
+    PROGRAMADO,
+    TECNICO_EN_CAMINO,
+    EQUIPO_RECIBIDO,
+    EN_DIAGNOSTICO,
+    PENDIENTE_AJUSTE,
+    EN_PROCESO,
+    EN_REPARACION,
+    LISTO_PARA_RECOGER,
+    FINALIZADO,
+    CONFIRMADO,
+    CALIFICADO,
+    CANCELADO
+}

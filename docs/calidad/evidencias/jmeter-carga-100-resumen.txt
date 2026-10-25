@@ -1,0 +1,28 @@
+FIXTECH - Prueba de carga RNF-02
+Fecha: 2026-10-25 18:10:04 PET
+Herramienta: Apache JMeter 5.6.3
+Plan: qa/jmeter/fixtech-catalogo.jmx
+Objetivo: GET /api/catalogos/distritos (endpoint público con acceso a base de datos)
+Comando:
+  jmeter -n -t qa/jmeter/fixtech-catalogo.jmx -Jhost=127.0.0.1 -Jport=18081 \
+    -Jthreads=100 -Jduration=60 -l qa/jmeter/resultados/carga-100.jtl
+
+Configuración: 100 usuarios concurrentes, rampa de 10 s, duración 60 s.
+
+Resultados:
+  Muestras:            139200
+  Exitosas:            139200
+  Fallidas:            0
+  Códigos HTTP:        200 (139200)
+  Rendimiento:         2314.8 peticiones/s
+  Media:               39.34 ms
+  Mediana:             36 ms
+  p90:                 86 ms
+  p95:                 103 ms
+  p99:                 136 ms
+  Máximo:              320 ms
+  Muestras <= 3000 ms: 100.00 %
+
+Criterio RNF-02: p95 <= 3000 ms con 100 usuarios concurrentes. CUMPLE.
+Observación: el alcance es un endpoint de catálogo; no sustituye una prueba de carga
+de los flujos transaccionales completos, que requiere un entorno con datos de prueba.

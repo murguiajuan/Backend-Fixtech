@@ -1,0 +1,4 @@
+# Copie este archivo como application-dev.properties para desarrollo local.
+# El archivo application-dev.properties está excluido de Git.
+# Genere un secreto con: openssl rand -hex 32
+app.jwt.secret=CAMBIE_ESTE_SECRETO_POR_UNO_ALEATORIO_DE_64_CARACTERES

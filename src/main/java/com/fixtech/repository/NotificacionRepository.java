@@ -1,0 +1,29 @@
+package com.fixtech.repository;
+
+import com.fixtech.entity.Notificacion;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+public interface NotificacionRepository extends JpaRepository<Notificacion, Long> {
+
+    List<Notificacion> findByUsuarioIdOrderByCreadoEnDesc(Long usuarioId);
+
+    List<Notificacion> findByUsuarioIdAndLeidaFalseOrderByCreadoEnDesc(Long usuarioId);
+
+    Optional<Notificacion> findByIdAndUsuarioId(Long id, Long usuarioId);
+
+    long countByUsuarioIdAndLeidaFalse(Long usuarioId);
+
+    @Modifying(flushAutomatically = true)
+    @Query("""
+            update Notificacion n
+            set n.leida = true
+            where n.usuario.id = :usuarioId
+              and n.leida = false
+            """)
+    int marcarTodasLeidas(@Param("usuarioId") Long usuarioId);
+}
