@@ -47,6 +47,13 @@ public class ArchivoService {
         return guardarImagen(Path.of("solicitudes", solicitudId.toString()), archivo);
     }
 
+    public String guardarFotoPerfilTecnico(Long tecnicoId, MultipartFile archivo) {
+        if (tecnicoId == null) {
+            throw new IllegalArgumentException("El técnico es obligatorio");
+        }
+        return guardarImagen(Path.of("tecnicos", tecnicoId.toString(), "perfil"), archivo);
+    }
+
     public String guardarImagenServicio(
             Long servicioId, String categoria, MultipartFile archivo) {
         if (categoria == null || !categoria.matches("[a-zA-Z0-9_-]+")) {

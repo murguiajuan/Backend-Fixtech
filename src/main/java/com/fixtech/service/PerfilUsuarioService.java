@@ -1,9 +1,12 @@
 package com.fixtech.service;
 
+import com.fixtech.dto.CatalogoSimpleResponse;
 import com.fixtech.dto.PerfilTecnicoResponse;
 import com.fixtech.dto.PerfilUsuarioResponse;
 import com.fixtech.entity.Administrador;
 import com.fixtech.entity.Cliente;
+import com.fixtech.entity.Distrito;
+import com.fixtech.entity.Especialidad;
 import com.fixtech.entity.Tecnico;
 import com.fixtech.entity.Usuario;
 import com.fixtech.entity.enums.EstadoUsuario;
@@ -15,7 +18,9 @@ import com.fixtech.repository.AdministradorRepository;
 import com.fixtech.repository.ClienteRepository;
 import com.fixtech.repository.TecnicoRepository;
 import com.fixtech.repository.UsuarioRepository;
+import com.fixtech.util.UrlArchivos;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -58,19 +63,30 @@ public class PerfilUsuarioService {
                         "Perfil de técnico no encontrado"));
         PerfilTecnicoResponse perfilTecnico = new PerfilTecnicoResponse(
                 tecnico.getId(),
+                tecnico.getDni(),
+                tecnico.getCelular(),
                 tecnico.getEstadoVerificacion(),
                 tecnico.getMotivoVerificacion(),
                 tecnico.isBloqueadoPorDeuda(),
                 tecnico.getSaldoComisionPendiente(),
                 modalidades(tecnico),
+                tecnico.isOfreceDomicilio(),
+                tecnico.isOfreceTaller(),
+                especialidades(tecnico),
+                distritos(tecnico),
                 tecnico.getDescripcion(),
-                tecnico.getAniosExperiencia(),
+                Byte.toUnsignedInt(tecnico.getAniosExperiencia()),
+                tecnico.getDireccionTaller(),
+                tecnico.getReferenciaTaller(),
+                tecnico.getHorarioTaller(),
+                tecnico.getGarantiaDiasDefecto(),
                 tecnico.getCalificacionPromedio(),
                 tecnico.getTotalResenas(),
                 tecnico.getServiciosCompletados(),
                 tecnico.isDestacado());
         return base(usuario, tecnico.getNombres(), tecnico.getApellidos(),
-                tecnico.getFotoUrl(), perfilTecnico);
+                tecnico.getFotoUrl() == null ? null : UrlArchivos.fotoTecnico(tecnico.getId()),
+                perfilTecnico);
     }
 
     private PerfilUsuarioResponse perfilAdministrador(Usuario usuario) {
@@ -108,5 +124,25 @@ public class PerfilUsuarioService {
             modalidades.add(Modalidad.TALLER);
         }
         return List.copyOf(modalidades);
+    }
+
+    private List<CatalogoSimpleResponse> especialidades(Tecnico tecnico) {
+        return tecnico.getEspecialidades().stream()
+                .sorted(Comparator.comparing(Especialidad::getNombre))
+                .map(especialidad -> new CatalogoSimpleResponse(
+                        especialidad.getId(),
+                        especialidad.getNombre(),
+                        especialidad.isActivo()))
+                .toList();
+    }
+
+    private List<CatalogoSimpleResponse> distritos(Tecnico tecnico) {
+        return tecnico.getDistritos().stream()
+                .sorted(Comparator.comparing(Distrito::getNombre))
+                .map(distrito -> new CatalogoSimpleResponse(
+                        distrito.getId(),
+                        distrito.getNombre(),
+                        distrito.isActivo()))
+                .toList();
     }
 }

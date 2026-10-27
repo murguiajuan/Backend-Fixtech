@@ -57,6 +57,29 @@ class ArchivoServiceTest {
     }
 
     @Test
+    void guarda_la_foto_de_perfil_de_un_tecnico() {
+        ArchivoService servicio = servicio(propiedades());
+        MockMultipartFile archivo = new MockMultipartFile(
+                "foto", "perfil.png", "image/png", imagenPng(20, 10));
+
+        String ruta = servicio.guardarFotoPerfilTecnico(7L, archivo);
+
+        assertTrue(ruta.startsWith("tecnicos/7/perfil/"));
+        assertTrue(ruta.endsWith(".png"));
+        assertTrue(Files.exists(directorioTemporal.resolve(ruta)));
+    }
+
+    @Test
+    void rechaza_la_foto_de_perfil_sin_tecnico() {
+        ArchivoService servicio = servicio(propiedades());
+        MockMultipartFile archivo = new MockMultipartFile(
+                "foto", "perfil.png", "image/png", imagenPng(10, 10));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> servicio.guardarFotoPerfilTecnico(null, archivo));
+    }
+
+    @Test
     void guarda_una_imagen_asociada_a_un_servicio() throws IOException {
         ArchivoService servicio = servicio(propiedades());
         MockMultipartFile archivo = new MockMultipartFile(

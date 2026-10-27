@@ -8,6 +8,7 @@ import com.fixtech.entity.Contraoferta;
 import com.fixtech.entity.Oferta;
 import com.fixtech.entity.Servicio;
 import com.fixtech.entity.Tecnico;
+import com.fixtech.util.UrlArchivos;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
@@ -92,7 +93,7 @@ public class OfertaMapper {
                 tecnico.getId(),
                 tecnico.getNombres(),
                 tecnico.getApellidos(),
-                tecnico.getFotoUrl(),
+                tecnico.getFotoUrl() == null ? null : UrlArchivos.fotoTecnico(tecnico.getId()),
                 tecnico.getDescripcion(),
                 Byte.toUnsignedInt(tecnico.getAniosExperiencia()),
                 escalar(tecnico.getCalificacionPromedio()),

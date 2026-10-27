@@ -227,6 +227,7 @@ La lista completa y los esquemas de petición/respuesta están en Swagger.
 | Módulo | Rutas |
 |---|---|
 | Autenticación | `POST /api/auth/register/cliente`, `/register/tecnico`, `/login`, `/refresh`; `GET /api/auth/me` (perfil autenticado) |
+| Perfil | `PUT /api/perfil/tecnico`, `POST /api/perfil/foto`; `GET /api/tecnicos/{id}/foto` (foto autorizada) |
 | Catálogos públicos | `GET /api/catalogos/tipos-equipo`, `/tipos-servicio`, `/especialidades`, `/distritos` |
 | Solicitudes | `/api/solicitudes`, `/api/solicitudes/mias`, `/api/solicitudes/disponibles` |
 | Ofertas y contraofertas | `/api/solicitudes/{id}/ofertas`, `/api/ofertas/{id}/...` |

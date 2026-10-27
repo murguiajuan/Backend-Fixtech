@@ -17,6 +17,8 @@ public interface TecnicoRepository extends JpaRepository<Tecnico, Long> {
 
     boolean existsByDni(String dni);
 
+    boolean existsByDniAndIdNot(String dni, Long id);
+
     @Query("""
             select t.usuario.id, t.nombres, t.apellidos from Tecnico t
             where t.usuario.id in :usuarioIds

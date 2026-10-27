@@ -19,6 +19,7 @@ import com.fixtech.entity.HistorialEstadoServicio;
 import com.fixtech.entity.Mensaje;
 import com.fixtech.entity.Servicio;
 import com.fixtech.entity.enums.Modalidad;
+import com.fixtech.util.UrlArchivos;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
@@ -120,7 +121,9 @@ public class ServicioMapper {
                         servicio.getTecnico().getApellidos(),
                         servicio.getTecnico().getCelular(),
                         servicio.getTecnico().getUsuario().getCorreo(),
-                        servicio.getTecnico().getFotoUrl(),
+                        servicio.getTecnico().getFotoUrl() == null
+                                ? null
+                                : UrlArchivos.fotoTecnico(servicio.getTecnico().getId()),
                         escalar(servicio.getTecnico().getCalificacionPromedio()),
                         servicio.getTecnico().getTotalResenas(),
                         taller ? servicio.getTecnico().getDireccionTaller() : null,

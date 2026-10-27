@@ -12,6 +12,7 @@ import com.fixtech.exception.ForbiddenException;
 import com.fixtech.exception.NotFoundException;
 import com.fixtech.repository.AdministradorRepository;
 import com.fixtech.repository.TecnicoRepository;
+import com.fixtech.util.UrlArchivos;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -142,7 +143,7 @@ public class AdministradorTecnicoService {
                 tecnico.getApellidos(),
                 tecnico.getDni(),
                 tecnico.getCelular(),
-                tecnico.getFotoUrl(),
+                tecnico.getFotoUrl() == null ? null : UrlArchivos.fotoTecnico(tecnico.getId()),
                 tecnico.getEstadoVerificacion(),
                 tecnico.getMotivoVerificacion(),
                 tecnico.isBloqueadoPorDeuda(),

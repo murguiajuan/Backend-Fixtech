@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 import com.fixtech.dto.PerfilUsuarioResponse;
 import com.fixtech.entity.Administrador;
 import com.fixtech.entity.Cliente;
+import com.fixtech.entity.Distrito;
+import com.fixtech.entity.Especialidad;
 import com.fixtech.entity.Tecnico;
 import com.fixtech.entity.Usuario;
 import com.fixtech.entity.enums.EstadoUsuario;
@@ -27,6 +29,7 @@ import com.fixtech.repository.UsuarioRepository;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -95,6 +98,12 @@ class PerfilUsuarioServiceTest {
                         .saldoComisionPendiente(new BigDecimal("35.50"))
                         .ofreceDomicilio(true)
                         .ofreceTaller(true)
+                        .direccionTaller("Av. Grau 123")
+                        .referenciaTaller("Frente al mercado")
+                        .horarioTaller("Lunes a sábado")
+                        .garantiaDiasDefecto(15)
+                        .especialidades(Set.of(especialidad(1L, "Redes y WiFi")))
+                        .distritos(Set.of(distrito(2L, "Castilla")))
                         .descripcion("Especialista en refrigeración")
                         .aniosExperiencia((byte) 8)
                         .calificacionPromedio(new BigDecimal("4.75"))
@@ -106,8 +115,10 @@ class PerfilUsuarioServiceTest {
         PerfilUsuarioResponse perfil = perfilUsuarioService.obtener(7L);
 
         assertEquals("Carlos", perfil.nombres());
-        assertEquals("tecnico.png", perfil.fotoUrl());
+        assertEquals("/api/tecnicos/20/foto", perfil.fotoUrl());
         assertEquals(20L, perfil.tecnico().id());
+        assertEquals("12345678", perfil.tecnico().dni());
+        assertEquals("999999999", perfil.tecnico().celular());
         assertEquals(EstadoVerificacion.OBSERVADO,
                 perfil.tecnico().estadoVerificacion());
         assertEquals("DNI ilegible", perfil.tecnico().motivoVerificacion());
@@ -115,6 +126,16 @@ class PerfilUsuarioServiceTest {
         assertEquals(new BigDecimal("35.50"), perfil.tecnico().saldoComisionPendiente());
         assertEquals(List.of(Modalidad.DOMICILIO, Modalidad.TALLER),
                 perfil.tecnico().modalidades());
+        assertTrue(perfil.tecnico().ofreceDomicilio());
+        assertTrue(perfil.tecnico().ofreceTaller());
+        assertEquals(1, perfil.tecnico().especialidades().size());
+        assertEquals("Redes y WiFi", perfil.tecnico().especialidades().get(0).nombre());
+        assertEquals(1, perfil.tecnico().distritos().size());
+        assertEquals("Castilla", perfil.tecnico().distritos().get(0).nombre());
+        assertEquals("Av. Grau 123", perfil.tecnico().direccionTaller());
+        assertEquals("Frente al mercado", perfil.tecnico().referenciaTaller());
+        assertEquals("Lunes a sábado", perfil.tecnico().horarioTaller());
+        assertEquals(15, perfil.tecnico().garantiaDiasDefecto());
         assertEquals(8, perfil.tecnico().aniosExperiencia());
         assertEquals(new BigDecimal("4.75"), perfil.tecnico().calificacionPromedio());
         assertEquals(12, perfil.tecnico().totalResenas());
@@ -202,6 +223,24 @@ class PerfilUsuarioServiceTest {
                 .passwordHash("hash")
                 .rol(rol)
                 .estado(EstadoUsuario.ACTIVO)
+                .build();
+    }
+
+    private Especialidad especialidad(Long id, String nombre) {
+        return Especialidad.builder()
+                .id(id)
+                .nombre(nombre)
+                .activo(true)
+                .build();
+    }
+
+    private Distrito distrito(Long id, String nombre) {
+        return Distrito.builder()
+                .id(id)
+                .nombre(nombre)
+                .provincia("Piura")
+                .topeMovilidad(new BigDecimal("15.00"))
+                .activo(true)
                 .build();
     }
 }
