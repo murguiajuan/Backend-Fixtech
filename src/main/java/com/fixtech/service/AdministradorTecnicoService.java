@@ -1,9 +1,11 @@
 package com.fixtech.service;
 
+import com.fixtech.dto.TecnicoAdminResponse;
 import com.fixtech.dto.TecnicoVerificacionResponse;
 import com.fixtech.dto.VerificacionTecnicoRequest;
 import com.fixtech.entity.Tecnico;
 import com.fixtech.entity.enums.EstadoVerificacion;
+import com.fixtech.entity.enums.Modalidad;
 import com.fixtech.entity.enums.TipoNotificacion;
 import com.fixtech.exception.BadRequestException;
 import com.fixtech.exception.ForbiddenException;
@@ -11,6 +13,9 @@ import com.fixtech.exception.NotFoundException;
 import com.fixtech.repository.AdministradorRepository;
 import com.fixtech.repository.TecnicoRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +25,32 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class AdministradorTecnicoService {
 
+    private static final int MAX_BUSQUEDA = 120;
+
     private final TecnicoRepository tecnicoRepository;
     private final AdministradorRepository administradorRepository;
     private final NotificacionService notificacionService;
     private final AuditoriaService auditoriaService;
+
+    @Transactional(readOnly = true)
+    public List<TecnicoAdminResponse> listar(
+            EstadoVerificacion estadoVerificacion, String busqueda) {
+        String filtro = normalizar(busqueda);
+        if (filtro != null && filtro.length() > MAX_BUSQUEDA) {
+            throw new BadRequestException(
+                    "La búsqueda no puede superar los %d caracteres"
+                            .formatted(MAX_BUSQUEDA));
+        }
+        String patron = filtro == null
+                ? ""
+                : "%" + filtro.toLowerCase(Locale.ROOT) + "%";
+        String texto = filtro == null ? "" : filtro.toLowerCase(Locale.ROOT);
+        List<Tecnico> tecnicos = estadoVerificacion == null
+                ? tecnicoRepository.buscarParaAdministracion(texto, patron)
+                : tecnicoRepository.buscarParaAdministracionPorEstado(
+                        estadoVerificacion, texto, patron);
+        return tecnicos.stream().map(this::aResponse).toList();
+    }
 
     @Transactional
     public TecnicoVerificacionResponse verificar(
@@ -104,5 +131,43 @@ public class AdministradorTecnicoService {
                 mensaje,
                 "TECNICO",
                 tecnico.getId());
+    }
+
+    private TecnicoAdminResponse aResponse(Tecnico tecnico) {
+        return new TecnicoAdminResponse(
+                tecnico.getId(),
+                tecnico.getUsuario().getId(),
+                tecnico.getUsuario().getCorreo(),
+                tecnico.getNombres(),
+                tecnico.getApellidos(),
+                tecnico.getDni(),
+                tecnico.getCelular(),
+                tecnico.getFotoUrl(),
+                tecnico.getEstadoVerificacion(),
+                tecnico.getMotivoVerificacion(),
+                tecnico.isBloqueadoPorDeuda(),
+                tecnico.getSaldoComisionPendiente(),
+                modalidades(tecnico),
+                tecnico.getCalificacionPromedio(),
+                tecnico.getTotalResenas(),
+                tecnico.getServiciosCompletados(),
+                tecnico.isDestacado(),
+                tecnico.getFechaVerificacion(),
+                tecnico.getCreadoEn());
+    }
+
+    private List<Modalidad> modalidades(Tecnico tecnico) {
+        List<Modalidad> modalidades = new ArrayList<>(2);
+        if (tecnico.isOfreceDomicilio()) {
+            modalidades.add(Modalidad.DOMICILIO);
+        }
+        if (tecnico.isOfreceTaller()) {
+            modalidades.add(Modalidad.TALLER);
+        }
+        return List.copyOf(modalidades);
+    }
+
+    private String normalizar(String valor) {
+        return StringUtils.hasText(valor) ? valor.trim() : null;
     }
 }

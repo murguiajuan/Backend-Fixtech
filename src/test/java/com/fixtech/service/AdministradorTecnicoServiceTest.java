@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
@@ -12,12 +13,14 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fixtech.dto.TecnicoAdminResponse;
 import com.fixtech.dto.TecnicoVerificacionResponse;
 import com.fixtech.dto.VerificacionTecnicoRequest;
 import com.fixtech.entity.Administrador;
 import com.fixtech.entity.Tecnico;
 import com.fixtech.entity.Usuario;
 import com.fixtech.entity.enums.EstadoVerificacion;
+import com.fixtech.entity.enums.Modalidad;
 import com.fixtech.entity.enums.Rol;
 import com.fixtech.entity.enums.TipoNotificacion;
 import com.fixtech.exception.BadRequestException;
@@ -25,6 +28,8 @@ import com.fixtech.exception.ForbiddenException;
 import com.fixtech.exception.NotFoundException;
 import com.fixtech.repository.AdministradorRepository;
 import com.fixtech.repository.TecnicoRepository;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -162,6 +167,60 @@ class AdministradorTecnicoServiceTest {
                         2L,
                         new VerificacionTecnicoRequest(
                                 EstadoVerificacion.APROBADO, null)));
+    }
+
+    @Test
+    void lista_tecnicos_con_ambos_identificadores_y_modalidades() {
+        Tecnico tecnico = tecnico();
+        tecnico.getUsuario().setCorreo("tecnico@fixtech.pe");
+        tecnico.setOfreceDomicilio(true);
+        tecnico.setOfreceTaller(true);
+        tecnico.setBloqueadoPorDeuda(true);
+        tecnico.setSaldoComisionPendiente(new BigDecimal("12.50"));
+        tecnico.setCalificacionPromedio(new BigDecimal("4.50"));
+        tecnico.setTotalResenas(4);
+        tecnico.setServiciosCompletados(9);
+        when(tecnicoRepository.buscarParaAdministracion("", ""))
+                .thenReturn(List.of(tecnico));
+
+        List<TecnicoAdminResponse> tecnicos =
+                administradorTecnicoService.listar(null, null);
+
+        assertEquals(1, tecnicos.size());
+        TecnicoAdminResponse response = tecnicos.getFirst();
+        assertEquals(2L, response.id());
+        assertEquals(20L, response.usuarioId());
+        assertEquals("tecnico@fixtech.pe", response.correo());
+        assertEquals(EstadoVerificacion.PENDIENTE, response.estadoVerificacion());
+        assertTrue(response.bloqueadoPorDeuda());
+        assertEquals(new BigDecimal("12.50"), response.saldoComisionPendiente());
+        assertEquals(List.of(Modalidad.DOMICILIO, Modalidad.TALLER),
+                response.modalidades());
+        assertEquals(new BigDecimal("4.50"), response.calificacionPromedio());
+        assertEquals(4, response.totalResenas());
+        assertEquals(9, response.serviciosCompletados());
+    }
+
+    @Test
+    void filtra_por_estado_y_normaliza_la_busqueda() {
+        when(tecnicoRepository.buscarParaAdministracionPorEstado(
+                EstadoVerificacion.OBSERVADO, "carlos", "%carlos%"))
+                .thenReturn(List.of());
+
+        List<TecnicoAdminResponse> tecnicos = administradorTecnicoService.listar(
+                EstadoVerificacion.OBSERVADO, "  CARLOS  ");
+
+        assertTrue(tecnicos.isEmpty());
+    }
+
+    @Test
+    void rechaza_una_busqueda_demasiado_larga() {
+        String busqueda = "x".repeat(121);
+
+        assertThrows(
+                BadRequestException.class,
+                () -> administradorTecnicoService.listar(null, busqueda));
+        verify(tecnicoRepository, never()).buscarParaAdministracion(anyString(), anyString());
     }
 
     private void prepararAdministrador() {

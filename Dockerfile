@@ -32,6 +32,7 @@ RUN mkdir -p /app/uploads \
 USER fixtech
 
 ENV SPRING_PROFILES_ACTIVE=prod \
+    SERVER_PORT=8080 \
     FIXTECH_ARCHIVOS_DIR=/app/uploads \
     JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseContainerSupport"
 

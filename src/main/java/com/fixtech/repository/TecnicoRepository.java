@@ -43,4 +43,34 @@ public interface TecnicoRepository extends JpaRepository<Tecnico, Long> {
 
     @EntityGraph(attributePaths = {"usuario"})
     List<Tecnico> findByBloqueadoPorDeudaTrue();
+
+    @EntityGraph(attributePaths = {"usuario"})
+    @Query("""
+            select t from Tecnico t
+            where (:busqueda = ''
+                   or lower(t.nombres) like :patron
+                   or lower(t.apellidos) like :patron
+                   or lower(t.dni) like :patron
+                   or lower(t.usuario.correo) like :patron)
+            order by t.creadoEn desc, t.id desc
+            """)
+    List<Tecnico> buscarParaAdministracion(
+            @Param("busqueda") String busqueda,
+            @Param("patron") String patron);
+
+    @EntityGraph(attributePaths = {"usuario"})
+    @Query("""
+            select t from Tecnico t
+            where t.estadoVerificacion = :estado
+              and (:busqueda = ''
+                   or lower(t.nombres) like :patron
+                   or lower(t.apellidos) like :patron
+                   or lower(t.dni) like :patron
+                   or lower(t.usuario.correo) like :patron)
+            order by t.creadoEn desc, t.id desc
+            """)
+    List<Tecnico> buscarParaAdministracionPorEstado(
+            @Param("estado") EstadoVerificacion estado,
+            @Param("busqueda") String busqueda,
+            @Param("patron") String patron);
 }

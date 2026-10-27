@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TARGET="${1:-http://127.0.0.1:8080}"
+TARGET="${1:-http://127.0.0.1:8082}"
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 OUT_DIR="${ZAP_OUT_DIR:-$PROJECT_DIR/qa/zap}"
-# El puerto 8080 suele estar ocupado por la propia API; ZAP usa otro por defecto.
+# El puerto de la API se configura con SERVER_PORT; ZAP usa otro puerto por defecto.
 ZAP_PORT="${ZAP_PORT:-18090}"
 mkdir -p "$OUT_DIR"
 

@@ -62,7 +62,7 @@ export FIXTECH_JWT_SECRET="$(openssl rand -hex 32)"
 ./mvnw spring-boot:run
 ```
 
-La API queda disponible en `http://localhost:8080`.
+La API queda disponible en `http://localhost:8082`. El puerto se puede cambiar con la variable `SERVER_PORT`.
 
 Si MySQL usa credenciales distintas:
 
@@ -76,8 +76,8 @@ export FIXTECH_DB_PASSWORD='su_clave'
 
 Con el perfil `dev`:
 
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Swagger UI: `http://localhost:8082/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8082/v3/api-docs`
 
 En el perfil `prod` la documentación interactiva queda deshabilitada.
 
@@ -89,6 +89,8 @@ En el perfil `prod` la documentación interactiva queda deshabilitada.
 | `FIXTECH_DB_USER` | Usuario de base de datos | `root` |
 | `FIXTECH_DB_PASSWORD` | Contraseña de base de datos | vacío |
 | `FIXTECH_JWT_SECRET` | Secreto HMAC para JWT | vacío; obligatorio fuera de desarrollo |
+| `FIXTECH_CORS_ORIGINS` | Orígenes permitidos para la SPA | `http://localhost:4200,http://127.0.0.1:4200` |
+| `SERVER_PORT` | Puerto HTTP de la API | `8082` |
 | `FIXTECH_ARCHIVOS_DIR` | Directorio privado de archivos | `uploads` |
 | `FIXTECH_OPENAPI_HABILITADO` | Habilita Swagger | `true` |
 | `FIXTECH_CORREO_HABILITADO` | Habilita envío de correos | `false` |
@@ -117,6 +119,8 @@ Servicios:
 - API: `http://localhost:8080`
 - MySQL: `localhost:3307` (evita el puerto 3306 de XAMPP)
 - Swagger: `http://localhost:8080/swagger-ui.html` con perfil `dev`
+
+En Docker el contenedor escucha internamente en el puerto `8080`; el puerto del host se define con `APP_PORT`. El puerto `8082` corresponde a la ejecución local con Maven.
 
 Para producción:
 
@@ -176,7 +180,7 @@ El plan de carga está en `qa/jmeter/fixtech-catalogo.jmx` y prueba un endpoint 
 jmeter -n \
   -t qa/jmeter/fixtech-catalogo.jmx \
   -Jhost=127.0.0.1 \
-  -Jport=8080 \
+  -Jport=8082 \
   -Jthreads=100 \
   -Jduration=60 \
   -l qa/jmeter/resultados/resultados.jtl \
@@ -190,7 +194,7 @@ Resultado de referencia: 139 200 peticiones con 100 usuarios concurrentes durant
 ### OWASP ZAP
 
 ```bash
-./scripts/qa/zap-baseline.sh http://127.0.0.1:8080
+./scripts/qa/zap-baseline.sh http://127.0.0.1:8082
 ```
 
 El script usa ZAP local o el contenedor oficial si está disponible. Los reportes se guardan en `qa/zap/`, que está excluido de Git. El baseline del cierre reportó **0 alertas altas, 0 medias y 0 bajas**; la evidencia está en [`docs/calidad/evidencias/zap-baseline-20261025.html`](docs/calidad/evidencias/zap-baseline-20261025.html).
@@ -222,7 +226,7 @@ La lista completa y los esquemas de petición/respuesta están en Swagger.
 
 | Módulo | Rutas |
 |---|---|
-| Autenticación | `POST /api/auth/register/cliente`, `/register/tecnico`, `/login`, `/refresh` |
+| Autenticación | `POST /api/auth/register/cliente`, `/register/tecnico`, `/login`, `/refresh`; `GET /api/auth/me` (perfil autenticado) |
 | Catálogos públicos | `GET /api/catalogos/tipos-equipo`, `/tipos-servicio`, `/especialidades`, `/distritos` |
 | Solicitudes | `/api/solicitudes`, `/api/solicitudes/mias`, `/api/solicitudes/disponibles` |
 | Ofertas y contraofertas | `/api/solicitudes/{id}/ofertas`, `/api/ofertas/{id}/...` |
