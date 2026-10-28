@@ -56,6 +56,18 @@ public class GlobalExceptionHandler {
         return construir(HttpStatus.FORBIDDEN, ex.getMessage(), request);
     }
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ErrorResponse> manejarDemasiadasSolicitudes(
+            TooManyRequestsException ex, HttpServletRequest request) {
+        return construir(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> manejarServicioNoDisponible(
+            ServiceUnavailableException ex, HttpServletRequest request) {
+        return construir(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage(), request);
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> manejarAccesoDenegado(
             AccessDeniedException ex, HttpServletRequest request) {

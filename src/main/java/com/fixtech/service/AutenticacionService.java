@@ -89,7 +89,7 @@ public class AutenticacionService {
         usuarioRepository.save(usuario);
     }
 
-    private TokenResponse generarTokens(Usuario usuario) {
+    public TokenResponse generarTokens(Usuario usuario) {
         return TokenResponse.bearer(
                 jwtService.generarAccessToken(usuario),
                 jwtService.generarRefreshToken(usuario),

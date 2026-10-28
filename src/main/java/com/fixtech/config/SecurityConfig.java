@@ -63,7 +63,11 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/refresh",
                                 "/api/auth/register/cliente",
-                                "/api/auth/register/tecnico").permitAll()
+                                "/api/auth/register/tecnico",
+                                "/api/auth/recuperacion/solicitar",
+                                "/api/auth/recuperacion/verificar",
+                                "/api/auth/recuperacion/restablecer",
+                                "/api/auth/recuperacion/acceder").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/catalogos/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

@@ -40,6 +40,12 @@ mysql -h 127.0.0.1 -u root < db/fixtech_db.sql
 
 El script crea la base `fixtech_db`, los catálogos, los parámetros y el administrador inicial. Cambie la contraseña del administrador antes de publicar el sistema.
 
+Si ya tiene una base creada antes de la recuperación OTP, aplique la migración una sola vez:
+
+```bash
+mysql -h 127.0.0.1 -u root fixtech_db < db/migraciones/001_recuperacion_otp.sql
+```
+
 ### 3. Configurar el secreto JWT
 
 Opción A, archivo local ignorado por Git:
@@ -93,7 +99,17 @@ En el perfil `prod` la documentación interactiva queda deshabilitada.
 | `SERVER_PORT` | Puerto HTTP de la API | `8082` |
 | `FIXTECH_ARCHIVOS_DIR` | Directorio privado de archivos | `uploads` |
 | `FIXTECH_OPENAPI_HABILITADO` | Habilita Swagger | `true` |
-| `FIXTECH_CORREO_HABILITADO` | Habilita envío de correos | `false` |
+| `FIXTECH_CORREO_HABILITADO` | Habilita envío de correos y el flujo OTP | `false` |
+| `FIXTECH_CORREO_REMITENTE` | Remitente de los correos | `no-reply@fixtech.pe` |
+| `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD` | Servidor SMTP | vacío; puerto `587` |
+| `FIXTECH_OTP_CODIGO_MINUTOS` | Vigencia del código OTP | `10` |
+| `FIXTECH_OTP_TICKET_MINUTOS` | Vigencia del ticket temporal | `10` |
+| `FIXTECH_OTP_MAX_INTENTOS` | Intentos por código | `5` |
+| `FIXTECH_OTP_REENVIO_SEGUNDOS` | Espera mínima entre reenvíos | `60` |
+| `FIXTECH_OTP_MAX_SOLICITUDES_CORREO` | Solicitudes por correo en la ventana | `3` |
+| `FIXTECH_OTP_MAX_SOLICITUDES_IP` | Solicitudes por IP en la ventana | `10` |
+| `FIXTECH_OTP_VENTANA_MINUTOS` | Ventana de rate limiting | `15` |
+| `FIXTECH_OTP_LIMPIEZA_MS` | Frecuencia de limpieza de códigos vencidos | `3600000` |
 | `SPRING_PROFILES_ACTIVE` | Perfil `dev` o `prod` | `dev` |
 
 Nunca versione `.env`, `application-dev.properties`, contraseñas, tokens ni secretos JWT.
@@ -227,6 +243,7 @@ La lista completa y los esquemas de petición/respuesta están en Swagger.
 | Módulo | Rutas |
 |---|---|
 | Autenticación | `POST /api/auth/register/cliente`, `/register/tecnico`, `/login`, `/refresh`; `GET /api/auth/me` (perfil autenticado) |
+| Recuperación OTP | `POST /api/auth/recuperacion/solicitar`, `/verificar`, `/restablecer`, `/acceder` |
 | Perfil | `PUT /api/perfil/tecnico`, `POST /api/perfil/foto`; `GET /api/tecnicos/{id}/foto` (foto autorizada) |
 | Catálogos públicos | `GET /api/catalogos/tipos-equipo`, `/tipos-servicio`, `/especialidades`, `/distritos` |
 | Solicitudes | `/api/solicitudes`, `/api/solicitudes/mias`, `/api/solicitudes/disponibles` |
@@ -236,6 +253,16 @@ La lista completa y los esquemas de petición/respuesta están en Swagger.
 | Reseñas y reclamos | `/api/servicios/{id}/resenas`, `/api/servicios/{id}/reclamos` |
 | Notificaciones | `/api/notificaciones` |
 | Administración | `/api/admin/tecnicos`, `/usuarios`, `/parametros`, `/catalogos`, `/dashboard`, `/reportes`, `/auditoria` |
+
+## Recuperación de contraseña
+
+El flujo usa un código OTP de seis dígitos enviado al correo registrado:
+
+1. `POST /api/auth/recuperacion/solicitar` responde `202` con un mensaje genérico, exista o no el correo.
+2. `POST /api/auth/recuperacion/verificar` valida el código y devuelve un ticket temporal de un solo uso.
+3. Con ese ticket, `POST /api/auth/recuperacion/restablecer` cambia la contraseña o `POST /api/auth/recuperacion/acceder` entrega tokens JWT para iniciar sesión sin cambiarla.
+
+El código vence a los 10 minutos, admite 5 intentos, se puede reenviar cada 60 segundos y tiene un máximo de 3 solicitudes por correo cada 15 minutos. Requiere `FIXTECH_CORREO_HABILITADO=true` y SMTP configurado; de lo contrario responde `503`. Los códigos se guardan con BCrypt y los tickets con SHA-256, nunca en texto plano. El job `RecuperacionLimpiezaJob` elimina los registros antiguos.
 
 ## Seguridad
 

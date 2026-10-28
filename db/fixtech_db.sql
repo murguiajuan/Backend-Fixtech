@@ -556,15 +556,21 @@ CREATE INDEX idx_audit_entidad ON auditoria (entidad, entidad_id);
 CREATE INDEX idx_audit_fecha   ON auditoria (creado_en);
 
 CREATE TABLE token_recuperacion (
-  id         BIGINT AUTO_INCREMENT PRIMARY KEY,
-  usuario_id BIGINT       NOT NULL,
-  token_hash VARCHAR(100) NOT NULL,
-  expira_en  DATETIME     NOT NULL,
-  usado      TINYINT(1)   NOT NULL DEFAULT 0,
-  creado_en  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  id                BIGINT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id        BIGINT       NOT NULL,
+  codigo_hash       VARCHAR(100) NOT NULL COMMENT 'BCrypt del código OTP, nunca texto plano',
+  ticket_hash       VARCHAR(64)  NULL COMMENT 'SHA-256 del ticket temporal',
+  expira_en         DATETIME     NOT NULL COMMENT 'Vigencia del código OTP',
+  ticket_expira_en  DATETIME     NULL COMMENT 'Vigencia del ticket posterior a la verificación',
+  intentos          TINYINT      NOT NULL DEFAULT 0,
+  usado             TINYINT(1)   NOT NULL DEFAULT 0 COMMENT 'Código OTP consumido',
+  ticket_usado      TINYINT(1)   NOT NULL DEFAULT 0 COMMENT 'Ticket consumido',
+  creado_en         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_tokrec_usuario FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
-CREATE INDEX idx_tokrec_hash ON token_recuperacion (token_hash);
+CREATE INDEX idx_tokrec_hash ON token_recuperacion (codigo_hash);
+CREATE INDEX idx_tokrec_usuario ON token_recuperacion (usuario_id, creado_en);
+CREATE INDEX idx_tokrec_ticket ON token_recuperacion (ticket_hash);
 
 -- =====================================================================
 -- 9. VISTAS UTILES
