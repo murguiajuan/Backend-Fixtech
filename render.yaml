@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: fixtech-backend
+    runtime: docker
+    branch: main
+    region: oregon
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /actuator/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: FIXTECH_DB_URL
+        sync: false
+      - key: FIXTECH_DB_USER
+        sync: false
+      - key: FIXTECH_DB_PASSWORD
+        sync: false
+      - key: FIXTECH_JWT_SECRET
+        generateValue: true
+      - key: FIXTECH_CORS_ORIGINS
+        sync: false
+      - key: FIXTECH_ARCHIVOS_DIR
+        value: /app/uploads
+      - key: FIXTECH_OPENAPI_HABILITADO
+        value: "false"
+      - key: FIXTECH_CORREO_HABILITADO
+        value: "false"
