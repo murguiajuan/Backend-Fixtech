@@ -1,14 +1,41 @@
-.git
+.git/
 .gitignore
-.idea
-.vscode
-target
-uploads
-backups
-*.log
+.idea/
+.vscode/
+.classpath
+.project
+.settings/
 *.iml
+*.iws
+*.ipr
+
+# Artefactos y compilaciones locales
+target/
+**/target/
+build/
+dist/
+out/
+
+# Datos locales y archivos de entorno (también sus variantes)
+uploads/
+**/uploads/
+backups/
+**/backups/
 .env
 .env.*
+**/.env
+**/.env.*
 src/main/resources/application-dev.properties
-docs
-qa
+
+# Logs y temporales
+*.log
+**/*.log
+logs/
+**/logs/
+*.tmp
+*.swp
+.DS_Store
+
+# Material no requerido para construir la imagen
+docs/
+qa/

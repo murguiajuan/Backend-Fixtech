@@ -31,6 +31,7 @@ RUN mkdir -p /app/uploads \
 
 USER fixtech
 
+# Render proporciona PORT; Spring usa 8080 como fallback local del contenedor.
 ENV SPRING_PROFILES_ACTIVE=prod \
     SERVER_PORT=8080 \
     FIXTECH_ARCHIVOS_DIR=/app/uploads \
